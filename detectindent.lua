@@ -15,7 +15,7 @@ function onBufferOpen(buf)
         if r == " " then
             spaces = spaces + 1
             space_count = string.len(util.GetLeadingWhitespace(line))
-            -- count empty lines as having the same indentation as the last one
+            -- count blank/empty lines as having the same indentation as the last one
             if string.len(line) == space_count then
                 space_count = prev_space_count
             end
