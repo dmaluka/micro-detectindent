@@ -2,21 +2,22 @@ VERSION = "1.0.0"
 
 local config = import("micro/config")
 local util = import("micro/util")
+local fmt = import("fmt")
 
-local micro = import("micro")
+function isCommentLine(buf, i)
+    local m = buf.LineArray:Match(i)
+    if m == nil then
+        return false
+    end
+    local s = fmt.Sprintf('%v', m)
+    return string.sub(s, 1, 13) == "map[0:comment"
+end
 
 function onBufferOpen(buf)
     local spaces, tabs = 0, 0
     local space_count, prev_space_count = -1, -1
     local tabsizes = {}
     local i = 0
-
-    -- example output: map[0:comment] 12
-    local m = buf.LineArray:Match(0)
-    if m ~= nil then
-        micro.TermMessage(m, m[0])
-    end
-
     while spaces + tabs < 500 and i < 1000 and i < buf:LinesNum() do
         space_count = 0
         local line = buf:Line(i)
@@ -32,14 +33,11 @@ function onBufferOpen(buf)
             tabs = tabs + 1
             space_count = -1
         end
-
         -- never count indents inside a comment
-        -- local match = buf.LineArray:Match(i)
-        -- if match ~= nil and match[0] == 'comment' then
-            -- space_count = -1
-        -- end
+        if isCommentLine(buf, i) then
+            space_count = -1
+        end
         -- count the change in indentation between non-empty indented lines
-
         if prev_space_count >= 0 and space_count > prev_space_count then
             local t = space_count - prev_space_count
             if tabsizes[t] == nil then
