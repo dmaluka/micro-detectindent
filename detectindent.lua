@@ -23,7 +23,7 @@ function onBufferOpen(buf)
             tabs = tabs + 1
         end
         -- count the change in indentation between non-empty indented lines
-        if space_count > 0 and prev_space_count > 0 and space_count > prev_space_count then
+        if prev_space_count >= 0 and space_count > prev_space_count then
             local t = space_count - prev_space_count
             if tabsizes[t] == nil then
                 tabsizes[t] = 1
