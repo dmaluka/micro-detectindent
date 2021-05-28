@@ -9,7 +9,7 @@ function onBufferOpen(buf)
     local tabsizes = {}
     local i = 0
     while spaces + tabs < 500 and i < 1000 and i < buf:LinesNum() do
-        space_count = -1
+        space_count = 0
         local line = buf:Line(i)
         local r = util.RuneAt(line, 0)
         if r == " " then
@@ -21,6 +21,7 @@ function onBufferOpen(buf)
             end
         elseif r == "\t" then
             tabs = tabs + 1
+            space_count = -1
         end
         -- count the change in indentation between non-empty indented lines
         if prev_space_count >= 0 and space_count > prev_space_count then
