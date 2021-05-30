@@ -4,15 +4,6 @@ local config = import("micro/config")
 local util = import("micro/util")
 local fmt = import("fmt")
 
-function isCommentLine(buf, i)
-    local m = buf.LineArray:Match(i)
-    if m == nil then
-        return false
-    end
-    local s = fmt.Sprintf('%v', m)
-    return string.sub(s, 1, 13) == "map[0:comment"
-end
-
 function onBufferOpen(buf)
     local spaces, tabs = 0, 0
     local space_count, prev_space_count = -1, -1
@@ -33,12 +24,10 @@ function onBufferOpen(buf)
             tabs = tabs + 1
             space_count = -1
         end
-        -- never count indents inside a comment
-        if isCommentLine(buf, i) then
-            space_count = -1
-        end
-        -- count the change in indentation between non-empty indented lines
-        if prev_space_count >= 0 and space_count > prev_space_count then
+        -- count the change in indentation between non-empty indented lines,
+        --  ignoring indentations of 1 which can be a false signal from C-style
+        --  block comments
+        if prev_space_count >= 0 and space_count > prev_space_count + 1 then
             local t = space_count - prev_space_count
             if tabsizes[t] == nil then
                 tabsizes[t] = 1
