@@ -10,7 +10,7 @@ function onBufferOpen(buf)
     local tabsizes = {}
     local i = 0
     while spaces + tabs < 500 and i < 1000 and i < buf:LinesNum() do
-        space_count = 0
+        space_count = prev_space_count
         local line = buf:Line(i)
         local r = util.RuneAt(line, 0)
         if r == " " then
@@ -34,8 +34,6 @@ function onBufferOpen(buf)
             end
         elseif r == "\t" then
             tabs = tabs + 1
-            -- treat lines beginning with tab as not affecting space indentation
-            space_count = prev_space_count
         end
         prev_space_count = space_count
         i = i + 1
