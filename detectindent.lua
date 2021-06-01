@@ -6,7 +6,7 @@ local fmt = import("fmt")
 
 function onBufferOpen(buf)
     local spaces, tabs = 0, 0
-    local space_count, prev_space_count = -1, -1
+    local space_count, prev_space_count = 0, 0
     local tabsizes = {}
     local i = 0
     while spaces + tabs < 500 and i < 1000 and i < buf:LinesNum() do
@@ -16,24 +16,26 @@ function onBufferOpen(buf)
         if r == " " then
             spaces = spaces + 1
             space_count = string.len(util.GetLeadingWhitespace(line))
-            -- count blank/empty lines as having the same indentation as the last one
+            -- count lines which are only whitespace as having
+            --  the same indentation as the last one
             if string.len(line) == space_count then
                 space_count = prev_space_count
             end
+            -- count the change in indentation between non-empty indented lines,
+            --  ignoring indentations of 1 which can be a false signal from C-style
+            --  block comments
+            if space_count > prev_space_count + 1 then
+                local t = space_count - prev_space_count
+                if tabsizes[t] == nil then
+                    tabsizes[t] = 1
+                else
+                    tabsizes[t] = tabsizes[t] + 1
+                end
+            end
         elseif r == "\t" then
             tabs = tabs + 1
-            space_count = -1
-        end
-        -- count the change in indentation between non-empty indented lines,
-        --  ignoring indentations of 1 which can be a false signal from C-style
-        --  block comments
-        if prev_space_count >= 0 and space_count > prev_space_count + 1 then
-            local t = space_count - prev_space_count
-            if tabsizes[t] == nil then
-                tabsizes[t] = 1
-            else
-                tabsizes[t] = tabsizes[t] + 1
-            end
+            -- treat lines beginning with tab as not affecting space indentation
+            space_count = prev_space_count
         end
         prev_space_count = space_count
         i = i + 1
@@ -42,8 +44,8 @@ function onBufferOpen(buf)
     if spaces > tabs then
         buf.Settings["tabstospaces"] = true
         -- get the indentation change used for the largest number of lines
-        tabsize = -1
-        maxcount = 0
+        local tabsize = -1
+        local maxcount = 0
         for t, count in pairs(tabsizes) do
             if count > maxcount then
                 maxcount = count
