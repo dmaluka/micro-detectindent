@@ -10,20 +10,18 @@ function onBufferOpen(buf)
     local tabsizes = {}
     local i = 0
     while spaces + tabs < 500 and i < 1000 and i < buf:LinesNum() do
-        space_count = prev_space_count
+        space_count = 0
         local line = buf:Line(i)
         local r = util.RuneAt(line, 0)
         if r == " " then
             spaces = spaces + 1
             space_count = string.len(util.GetLeadingWhitespace(line))
-            -- count lines which are only whitespace as having
-            --  the same indentation as the last one
+            -- treat whitespace-only lines as not changing the indent
             if string.len(line) == space_count then
                 space_count = prev_space_count
             end
-            -- count the change in indentation between non-empty indented lines,
-            --  ignoring indentations of 1 which can be a false signal from C-style
-            --  block comments
+            -- look for an increasing number of spaces, ignoring increases of 1
+            --  which can be a false signal from C-style block comments
             if space_count > prev_space_count + 1 then
                 local t = space_count - prev_space_count
                 if tabsizes[t] == nil then
@@ -34,6 +32,11 @@ function onBufferOpen(buf)
             end
         elseif r == "\t" then
             tabs = tabs + 1
+            -- treat tabbed lines as not affecting spaced indentation
+            space_count = prev_space_count
+        elseif string.len(line) == 0 then
+            -- treat empty lines as not changing the indent
+            space_count = prev_space_count
         end
         prev_space_count = space_count
         i = i + 1
