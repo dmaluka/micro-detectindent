@@ -13,8 +13,13 @@ function onBufferOpen(buf)
         local line = buf:Line(i)
         local r = util.RuneAt(line, 0)
         if r == " " then
-            spaces = spaces + 1
             space_count = string.len(util.GetLeadingWhitespace(line))
+            -- for tab vs space detection, ignore space indents of 1
+            --  which can be a false signal from C-style block comments
+            if space_count > 1 then
+                spaces = spaces + 1
+            end
+
             -- treat whitespace-only lines as not changing the indent
             if string.len(line) == space_count then
                 space_count = prev_space_count
