@@ -2,7 +2,6 @@ VERSION = "1.0.0"
 
 local config = import("micro/config")
 local util = import("micro/util")
-local fmt = import("fmt")
 
 function onBufferOpen(buf)
     local spaces, tabs = 0, 0
@@ -34,7 +33,7 @@ function onBufferOpen(buf)
             tabs = tabs + 1
             -- treat tabbed lines as not affecting spaced indentation
             space_count = prev_space_count
-        elseif string.len(line) == 0 then
+        elseif r == "" then
             -- treat empty lines as not changing the indent
             space_count = prev_space_count
         end
