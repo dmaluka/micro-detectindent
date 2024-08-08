@@ -47,7 +47,7 @@ function onBufferOpen(buf)
     end
 
     if spaces > tabs then
-        buf.Settings["tabstospaces"] = true
+        buf:SetOptionNative("tabstospaces", true)
         -- get the indentation change used for the largest number of lines
         local tabsize = -1
         local maxcount = 0
@@ -58,10 +58,10 @@ function onBufferOpen(buf)
             end
         end
         if tabsize > 0 then
-            buf.Settings["tabsize"] = tabsize
+            buf:SetOptionNative("tabsize", tabsize)
         end
     elseif tabs > spaces then
-        buf.Settings["tabstospaces"] = false
+        buf:SetOptionNative("tabstospaces", false)
     end
 end
 
