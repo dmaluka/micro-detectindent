@@ -10,3 +10,9 @@ To disable it, just turn off the plugin:
 ```
 set detectindent off
 ```
+
+It is also possible to trigger detection manually, via command:
+
+```
+detectindent
+```
