@@ -3,7 +3,7 @@ VERSION = "1.1.1"
 local config = import("micro/config")
 local util = import("micro/util")
 
-function onBufferOpen(buf)
+function detectindent(buf)
     local spaces, tabs = 0, 0
     local space_count, prev_space_count = 0, 0
     local tabsizes = {}
@@ -65,6 +65,14 @@ function onBufferOpen(buf)
     end
 end
 
+function onBufferOpen(buf)
+    detectindent(buf)
+end
+
 function init()
     config.AddRuntimeFile("detectindent", config.RTHelp, "help/detectindent.md")
+    config.MakeCommand("detectindent", function(bp)
+                                           detectindent(bp.Buf)
+                                       end,
+                       config.NoComplete)
 end
